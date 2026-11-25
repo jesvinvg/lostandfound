@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusFind – College Lost &amp; Found Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       LOGIN VIEW (SHOWN FIRST BEFORE PORTAL ACCESS)
+       ============================================================ -->
+  <div class="login-wrapper" id="view-login">
+    <div class="login-container">
+      
+      <!-- Brand Header -->
+      <div class="login-brand">
+        <div class="login-logo-icon">
+          <i data-lucide="search"></i>
+        </div>
+        <h1 class="login-title">CampusFind</h1>
+        <p class="login-subtitle">College Lost &amp; Found Portal</p>
+        <p class="login-instruction">Please choose your portal role to sign in</p>
+      </div>
+
+      <!-- Role Tabs -->
+      <div class="login-role-tabs">
+        <button type="button" class="role-tab active" id="tab-student" data-role="student" onclick="window.switchLoginRole('student')">
+          <i data-lucide="graduation-cap"></i>
+          <span>Student / User</span>
+        </button>
+        <button type="button" class="role-tab" id="tab-admin" data-role="admin" onclick="window.switchLoginRole('admin')">
+          <i data-lucide="shield-check"></i>
+          <span>Staff / Admin</span>
+        </button>
+      </div>
+
+      <!-- Student Login Panel -->
+      <div class="login-card-panel active" id="panel-student">
+        <div class="role-info-banner student-info">
+          <i data-lucide="user-check"></i>
+          <span>Search, track, and report lost or found belongings on campus.</span>
+        </div>
+        <form id="student-login-form" onsubmit="event.preventDefault(); window.submitStudentLogin();" novalidate>
+          <div class="form-group">
+            <label for="student-email">College Email / Student ID</label>
+            <div class="input-icon-wrap">
+              <i data-lucide="mail"></i>
+              <input type="text" id="student-email" value="rahul.sharma@college.edu" placeholder="student@college.edu" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="student-password">Password</label>
+            <div class="input-icon-wrap">
+              <i data-lucide="lock"></i>
+              <input type="password" id="student-password" value="student123" placeholder="••••••••" required />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-submit-student" onclick="event.preventDefault(); window.submitStudentLogin();">
+            <i data-lucide="log-in"></i> Sign In as Student
+          </button>
+          <div class="quick-login-divider"><span>OR ONE-CLICK ACCESS</span></div>
+          <button type="button" class="btn btn-demo-quick" id="btn-quick-student" onclick="window.quickLogin('student')">
+            <i data-lucide="zap"></i> Instant 1-Click Login (Rahul Sharma)
+          </button>
+        </form>
+      </div>
+
+      <!-- Admin Login Panel -->
+      <div class="login-card-panel" id="panel-admin">
+        <div class="role-info-banner admin-info">
+          <i data-lucide="shield-alert"></i>
+          <span>Security &amp; staff: verify claims, approve returns, and manage listings.</span>
+        </div>
+        <form id="admin-login-form" onsubmit="event.preventDefault(); window.submitAdminLogin();" novalidate>
+          <div class="form-group">
+            <label for="admin-email">Staff ID / Admin Email</label>
+            <div class="input-icon-wrap">
+              <i data-lucide="shield"></i>
+              <input type="text" id="admin-email" value="security.admin@college.edu" placeholder="admin@college.edu" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="admin-password">Administrative Password</label>
+            <div class="input-icon-wrap">
+              <i data-lucide="lock"></i>
+              <input type="password" id="admin-password" value="admin123" placeholder="••••••••" required />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-admin-primary btn-block btn-lg" id="btn-submit-admin" onclick="event.preventDefault(); window.submitAdminLogin();">
+            <i data-lucide="shield-check"></i> Sign In as Administrator
+          </button>
+          <div class="quick-login-divider"><span>OR ONE-CLICK ACCESS</span></div>
+          <button type="button" class="btn btn-demo-quick btn-quick-admin-accent" id="btn-quick-admin" onclick="window.quickLogin('admin')">
+            <i data-lucide="zap"></i> Instant 1-Click Login (Campus Security Admin)
+          </button>
+        </form>
+      </div>
+
+      <div class="login-card-footer">
+        <i data-lucide="check-circle-2"></i> Demo mode – all session &amp; records stored in local storage
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       APPLICATION SHELL (TOP NAVIGATION + MAIN VIEWS)
+       ============================================================ -->
+  <div class="app-shell" id="app-shell" style="display:none;">
+
+    <!-- TOP NAVIGATION BAR (NO LEFT SIDEBAR) -->
+    <header class="top-nav-header" id="top-nav-header">
+      <div class="top-nav-container">
+        
+        <!-- Brand Logo on Left -->
+        <div class="nav-brand" id="nav-brand-logo" role="button" tabindex="0" title="Back to Home">
+          <div class="nav-brand-icon">
+            <i data-lucide="search"></i>
+          </div>
+          <div class="nav-brand-text">
+            <span class="nav-brand-title">CampusFind</span>
+            <span class="nav-brand-sub">Lost &amp; Found</span>
+          </div>
+        </div>
+
+        <!-- Center Navigation Links -->
+        <nav class="nav-links-center" id="nav-links-center">
+          <a href="#" class="nav-item active" data-view="home">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+          </a>
+          <a href="#" class="nav-item" data-view="found">
+            <i data-lucide="package-check"></i>
+            <span>Found Items</span>
+          </a>
+          <a href="#" class="nav-item" data-view="lost">
+            <i data-lucide="package-search"></i>
+            <span>Lost Items</span>
+          </a>
+          <a href="#" class="nav-item" data-view="report-lost">
+            <i data-lucide="file-plus"></i>
+            <span>Report Lost</span>
+          </a>
+          <a href="#" class="nav-item" data-view="report-found">
+            <i data-lucide="file-check"></i>
+            <span>Report Found</span>
+          </a>
+          <a href="#" class="nav-item" data-view="activity">
+            <i data-lucide="activity"></i>
+            <span>My Activity</span>
+          </a>
+          <a href="#" class="nav-item nav-item-admin" id="nav-item-admin" data-view="admin">
+            <i data-lucide="shield-check"></i>
+            <span>Admin Dashboard</span>
+          </a>
+        </nav>
+
+        <!-- Right Side: User Profile, Notification Bell & Logout -->
+        <div class="nav-actions-right">
+          
+          <!-- Notification Bell with Dropdown -->
+          <div class="notification-bell-wrap" id="notification-bell-wrap">
+            <button class="btn-icon-bell" id="btn-notification-bell" type="button" aria-label="Notifications" title="Notifications">
+              <i data-lucide="bell"></i>
+              <span class="bell-badge" id="bell-badge" style="display:none;">0</span>
+            </button>
+            <div class="notification-dropdown" id="notification-dropdown">
+              <div class="notif-header">
+                <div class="notif-header-title">
+                  <i data-lucide="bell"></i>
+                  <span>Notifications &amp; Alerts</span>
+                </div>
+                <span class="notif-count-pill" id="notif-count-text">0 new</span>
+              </div>
+              <div class="notif-list" id="notif-list">
+                <!-- JS renders live notification list -->
+              </div>
+            </div>
+          </div>
+
+          <div class="user-capsule" id="user-capsule">
+            <div class="user-avatar" id="user-avatar">
+              <i data-lucide="user"></i>
+            </div>
+            <div class="user-info">
+              <span class="user-name" id="user-display-name">Rahul Sharma</span>
+              <span class="user-role-badge role-student" id="user-role-badge">Student</span>
+            </div>
+          </div>
+
+          <button class="btn-logout" id="btn-logout" title="Sign out / Switch Role">
+            <i data-lucide="log-out"></i>
+            <span class="logout-text">Logout</span>
+          </button>
+
+          <!-- Mobile Hamburger -->
+          <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle navigation">
+            <i data-lucide="menu"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Dropdown Navigation -->
+      <div class="mobile-nav-menu" id="mobile-nav-menu">
+        <a href="#" class="mobile-nav-item active" data-view="home">
+          <i data-lucide="home"></i> <span>Home</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-view="found">
+          <i data-lucide="package-check"></i> <span>Found Items</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-view="lost">
+          <i data-lucide="package-search"></i> <span>Lost Items</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-view="report-lost">
+          <i data-lucide="file-plus"></i> <span>Report Lost</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-view="report-found">
+          <i data-lucide="file-check"></i> <span>Report Found</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-view="activity">
+          <i data-lucide="activity"></i> <span>My Activity</span>
+        </a>
+        <a href="#" class="mobile-nav-item mobile-nav-admin" id="mobile-nav-admin" data-view="admin">
+          <i data-lucide="shield-check"></i> <span>Admin Dashboard</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Page Content (Centered & Spacious without Left Sidebar) -->
+    <main class="page-content">
+
+      <!-- ========== VIEW: HOME ========== -->
+      <section class="view active" id="view-home">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Welcome to CampusFind</h1>
+            <p class="view-subtitle">Your campus lost &amp; found portal – reuniting students with their belongings.</p>
+          </div>
+        </div>
+
+        <!-- PRIMARY HERO CHOICE CARDS: I LOST SOMETHING & I FOUND SOMETHING -->
+        <div class="hero-choice-cards">
+          <div class="choice-card choice-card-lost">
+            <div class="choice-card-tag">WHAT'S YOUR SITUATION?</div>
+            <div class="choice-card-header">
+              <div class="choice-icon-wrap icon-lost">
+                <i data-lucide="search"></i>
+              </div>
+              <div>
+                <h2>I Lost Something</h2>
+                <p>Misplaced your earphones, wallet, ID card, keys, or books on campus?</p>
+              </div>
+            </div>
+            <div class="choice-card-body">
+              <p class="choice-tip">Search what students found or submit a report so others can reach you!</p>
+              <div class="choice-btns">
+                <button class="btn btn-primary" data-view="found">
+                  <i data-lucide="package-check"></i> Browse Found Items
+                </button>
+                <button class="btn btn-outline" data-view="report-lost">
+                  <i data-lucide="file-plus"></i> Report a Lost Item
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="choice-card choice-card-found">
+            <div class="choice-card-tag tag-green">HELP A CLASSMATE</div>
+            <div class="choice-card-header">
+              <div class="choice-icon-wrap icon-found">
+                <i data-lucide="gift"></i>
+              </div>
+              <div>
+                <h2>I Found Something</h2>
+                <p>Picked up an item in a lecture hall, library, canteen, or campus ground?</p>
+              </div>
+            </div>
+            <div class="choice-card-body">
+              <p class="choice-tip">Check if a student reported it lost to notify them, or report it as found!</p>
+              <div class="choice-btns">
+                <button class="btn btn-success" data-view="report-found">
+                  <i data-lucide="file-check"></i> Report Found Item
+                </button>
+                <button class="btn btn-outline" data-view="lost">
+                  <i data-lucide="package-search"></i> See Lost Items (Notify Owner)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Home Search Hero -->
+        <div class="hero-search-box">
+          <h2>Looking for a specific item right now?</h2>
+          <p>Quick search through all reported items across campus.</p>
+          <div class="hero-search-row">
+            <input type="text" id="home-search-input" placeholder="Search by name, brand, or location (e.g. wallet, library, Titan)..." autocomplete="off" />
+            <button id="home-search-btn" class="btn btn-accent">
+              <i data-lucide="search"></i> Search Found Items
+            </button>
+          </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stats-grid" id="home-stats-grid">
+          <div class="stat-card stat-found">
+            <div class="stat-icon"><i data-lucide="package-check"></i></div>
+            <div class="stat-info">
+              <div class="stat-number" id="stat-total-found">0</div>
+              <div class="stat-label">Total Found</div>
+            </div>
+          </div>
+          <div class="stat-card stat-lost">
+            <div class="stat-icon"><i data-lucide="package-search"></i></div>
+            <div class="stat-info">
+              <div class="stat-number" id="stat-total-lost">0</div>
+              <div class="stat-label">Total Lost</div>
+            </div>
+          </div>
+          <div class="stat-card stat-returned">
+            <div class="stat-icon"><i data-lucide="check-circle"></i></div>
+            <div class="stat-info">
+              <div class="stat-number" id="stat-returned">0</div>
+              <div class="stat-label">Items Returned</div>
+            </div>
+          </div>
+          <div class="stat-card stat-pending">
+            <div class="stat-icon"><i data-lucide="clock"></i></div>
+            <div class="stat-info">
+              <div class="stat-number" id="stat-pending-claims">0</div>
+              <div class="stat-label">Pending Claims</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Items Row -->
+        <div class="recent-row">
+          <div class="recent-col">
+            <div class="section-header">
+              <h2><i data-lucide="package-check"></i> Recently Found</h2>
+              <a href="#" class="view-all-link" data-view="found">View All →</a>
+            </div>
+            <div class="recent-grid" id="recent-found-grid"><!-- JS renders --></div>
+          </div>
+          <div class="recent-col">
+            <div class="section-header">
+              <h2><i data-lucide="package-search"></i> Recently Lost</h2>
+              <a href="#" class="view-all-link" data-view="lost">View All →</a>
+            </div>
+            <div class="recent-grid" id="recent-lost-grid"><!-- JS renders --></div>
+          </div>
+        </div>
+
+        <!-- How it Works -->
+        <div class="how-it-works">
+          <h2 class="section-title">How It Works</h2>
+          <div class="steps-row">
+            <div class="step-card">
+              <div class="step-number">1</div>
+              <div class="step-icon"><i data-lucide="file-plus"></i></div>
+              <h3>Report</h3>
+              <p>Found something? Report it via "Report Found". Lost something? Use "Report Lost".</p>
+            </div>
+            <div class="step-arrow"><i data-lucide="arrow-right"></i></div>
+            <div class="step-card">
+              <div class="step-number">2</div>
+              <div class="step-icon"><i data-lucide="shield-check"></i></div>
+              <h3>Review</h3>
+              <p>Our admins review all reports and claims within 24 hours to verify authenticity.</p>
+            </div>
+            <div class="step-arrow"><i data-lucide="arrow-right"></i></div>
+            <div class="step-card">
+              <div class="step-number">3</div>
+              <div class="step-icon"><i data-lucide="handshake"></i></div>
+              <h3>Reunite</h3>
+              <p>Once verified, we coordinate with both parties to safely return the item to its owner.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== VIEW: FOUND ITEMS ========== -->
+      <section class="view" id="view-found">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Found Items</h1>
+            <p class="view-subtitle">Browse all items that have been found and reported on campus.</p>
+          </div>
+          <button class="btn btn-primary" data-view="report-found" id="btn-add-found">
+            <i data-lucide="plus"></i> Report Found Item
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrapper">
+            <i data-lucide="search"></i>
+            <input type="text" id="found-search" placeholder="Search found items…" autocomplete="off" />
+          </div>
+          <select id="found-category-filter" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Jewellery">Jewellery</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Personal Belongings">Personal Belongings</option>
+            <option value="Documents">Documents</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Bags">Bags</option>
+            <option value="Stationery">Stationery</option>
+            <option value="Other">Other</option>
+          </select>
+          <span id="found-count-label" class="count-label"></span>
+        </div>
+
+        <div class="items-grid" id="found-items-grid"><!-- JS renders --></div>
+      </section>
+
+      <!-- ========== VIEW: LOST ITEMS ========== -->
+      <section class="view" id="view-lost">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Lost Items</h1>
+            <p class="view-subtitle">Browse all items that have been reported as lost by students.</p>
+          </div>
+          <button class="btn btn-primary" data-view="report-lost" id="btn-add-lost">
+            <i data-lucide="plus"></i> Report Lost Item
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrapper">
+            <i data-lucide="search"></i>
+            <input type="text" id="lost-search" placeholder="Search lost items…" autocomplete="off" />
+          </div>
+          <select id="lost-category-filter" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Jewellery">Jewellery</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Personal Belongings">Personal Belongings</option>
+            <option value="Documents">Documents</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Bags">Bags</option>
+            <option value="Stationery">Stationery</option>
+            <option value="Other">Other</option>
+          </select>
+          <span id="lost-count-label" class="count-label"></span>
+        </div>
+
+        <div class="items-grid" id="lost-items-grid"><!-- JS renders --></div>
+      </section>
+
+      <!-- ========== VIEW: REPORT LOST ========== -->
+      <section class="view" id="view-report-lost">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Report a Lost Item</h1>
+            <p class="view-subtitle">Fill in the details below to report your lost item. We'll notify you if it's found.</p>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <form id="report-lost-form" novalidate>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="rl-name">Item Name <span class="required">*</span></label>
+                <input type="text" id="rl-name" placeholder="e.g. Black Laptop Bag" required />
+                <span class="field-error" id="rl-name-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rl-category">Category <span class="required">*</span></label>
+                <select id="rl-category" required>
+                  <option value="">Select a category</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Jewellery">Jewellery</option>
+                  <option value="Accessories">Accessories</option>
+                  <option value="Personal Belongings">Personal Belongings</option>
+                  <option value="Documents">Documents</option>
+                  <option value="Clothing">Clothing</option>
+                  <option value="Bags">Bags</option>
+                  <option value="Stationery">Stationery</option>
+                  <option value="Other">Other</option>
+                </select>
+                <span class="field-error" id="rl-category-err"></span>
+              </div>
+              <div class="form-group form-full">
+                <label for="rl-description">Description <span class="required">*</span></label>
+                <textarea id="rl-description" rows="4" placeholder="Describe the item in detail – color, brand, any distinguishing marks…" required></textarea>
+                <span class="field-error" id="rl-description-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rl-date">Date Lost <span class="required">*</span></label>
+                <input type="date" id="rl-date" required />
+                <span class="field-error" id="rl-date-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rl-location">Last Seen Location <span class="required">*</span></label>
+                <input type="text" id="rl-location" placeholder="e.g. Library 2nd Floor" required />
+                <span class="field-error" id="rl-location-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rl-owner-name">Your Full Name <span class="required">*</span></label>
+                <input type="text" id="rl-owner-name" placeholder="e.g. Priya Sharma" required />
+                <span class="field-error" id="rl-owner-name-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rl-owner-email">Your College Email <span class="required">*</span></label>
+                <input type="email" id="rl-owner-email" placeholder="e.g. priya@college.edu" required />
+                <span class="field-error" id="rl-owner-email-err"></span>
+              </div>
+              <div class="form-group form-full">
+                <label for="rl-image">Upload Image (optional)</label>
+                <div class="file-upload-wrapper">
+                  <label for="rl-image" class="file-upload-label">
+                    <i data-lucide="upload-cloud"></i>
+                    <span>Click to upload or drag &amp; drop</span>
+                    <span class="file-upload-hint">PNG, JPG up to 5MB</span>
+                  </label>
+                  <input type="file" id="rl-image" accept="image/*" class="file-input" />
+                </div>
+                <div class="image-preview-box" id="rl-image-preview" style="display:none;">
+                  <img id="rl-preview-img" src="" alt="Preview" />
+                  <button type="button" class="remove-preview-btn" id="rl-remove-preview"><i data-lucide="x"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="rl-reset-btn">
+                <i data-lucide="refresh-cw"></i> Reset
+              </button>
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i data-lucide="send"></i> Submit Lost Report
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ========== VIEW: REPORT FOUND ========== -->
+      <section class="view" id="view-report-found">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Report a Found Item</h1>
+            <p class="view-subtitle">Thank you for being honest! Fill in the details to report what you found.</p>
+          </div>
+        </div>
+
+        <div class="form-container">
+          <form id="report-found-form" novalidate>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="rf-name">Item Name <span class="required">*</span></label>
+                <input type="text" id="rf-name" placeholder="e.g. Silver Watch" required />
+                <span class="field-error" id="rf-name-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rf-category">Category <span class="required">*</span></label>
+                <select id="rf-category" required>
+                  <option value="">Select a category</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Jewellery">Jewellery</option>
+                  <option value="Accessories">Accessories</option>
+                  <option value="Personal Belongings">Personal Belongings</option>
+                  <option value="Documents">Documents</option>
+                  <option value="Clothing">Clothing</option>
+                  <option value="Bags">Bags</option>
+                  <option value="Stationery">Stationery</option>
+                  <option value="Other">Other</option>
+                </select>
+                <span class="field-error" id="rf-category-err"></span>
+              </div>
+              <div class="form-group form-full">
+                <label for="rf-description">Description <span class="required">*</span></label>
+                <textarea id="rf-description" rows="4" placeholder="Describe the item – where exactly you found it, any marks, brand, color…" required></textarea>
+                <span class="field-error" id="rf-description-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rf-date">Date Found <span class="required">*</span></label>
+                <input type="date" id="rf-date" required />
+                <span class="field-error" id="rf-date-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rf-location">Location Found <span class="required">*</span></label>
+                <input type="text" id="rf-location" placeholder="e.g. Classroom Block A" required />
+                <span class="field-error" id="rf-location-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rf-finder-name">Your Full Name <span class="required">*</span></label>
+                <input type="text" id="rf-finder-name" placeholder="e.g. Rahul Verma" required />
+                <span class="field-error" id="rf-finder-name-err"></span>
+              </div>
+              <div class="form-group">
+                <label for="rf-finder-email">Your College Email <span class="required">*</span></label>
+                <input type="email" id="rf-finder-email" placeholder="e.g. rahul@college.edu" required />
+                <span class="field-error" id="rf-finder-email-err"></span>
+              </div>
+              <div class="form-group form-full">
+                <label for="rf-image">Upload Image (optional)</label>
+                <div class="file-upload-wrapper">
+                  <label for="rf-image" class="file-upload-label">
+                    <i data-lucide="upload-cloud"></i>
+                    <span>Click to upload or drag &amp; drop</span>
+                    <span class="file-upload-hint">PNG, JPG up to 5MB</span>
+                  </label>
+                  <input type="file" id="rf-image" accept="image/*" class="file-input" />
+                </div>
+                <div class="image-preview-box" id="rf-image-preview" style="display:none;">
+                  <img id="rf-preview-img" src="" alt="Preview" />
+                  <button type="button" class="remove-preview-btn" id="rf-remove-preview"><i data-lucide="x"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="rf-reset-btn">
+                <i data-lucide="refresh-cw"></i> Reset
+              </button>
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i data-lucide="send"></i> Submit Found Report
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ========== VIEW: MY ACTIVITY ========== -->
+      <section class="view" id="view-activity">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">My Activity</h1>
+            <p class="view-subtitle">Track your lost reports, found reports, and claim requests.</p>
+          </div>
+        </div>
+
+        <div class="tabs-container">
+          <div class="tabs-header">
+            <button class="tab-btn active" data-tab="my-lost">
+              <i data-lucide="package-search"></i> My Lost Reports
+            </button>
+            <button class="tab-btn" data-tab="my-found">
+              <i data-lucide="package-check"></i> My Found Reports
+            </button>
+            <button class="tab-btn" data-tab="my-claims">
+              <i data-lucide="file-text"></i> My Claims
+            </button>
+            <button class="tab-btn" data-tab="my-notifications">
+              <i data-lucide="bell"></i> Notifications &amp; Matches
+            </button>
+          </div>
+          <div class="tab-content active" id="tab-my-lost">
+            <div class="items-grid" id="my-lost-grid"><!-- JS renders --></div>
+          </div>
+          <div class="tab-content" id="tab-my-found">
+            <div class="items-grid" id="my-found-grid"><!-- JS renders --></div>
+          </div>
+          <div class="tab-content" id="tab-my-claims">
+            <div class="claims-list" id="my-claims-list"><!-- JS renders --></div>
+          </div>
+          <div class="tab-content" id="tab-my-notifications">
+            <div class="notif-activity-list" id="my-notifications-list"><!-- JS renders --></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== VIEW: ADMIN DASHBOARD ========== -->
+      <section class="view" id="view-admin">
+        <div class="admin-banner">
+          <i data-lucide="shield-alert"></i>
+          <span>ADMIN PANEL – Demonstration Mode &nbsp;|&nbsp; All changes are saved to your browser's local storage only</span>
+        </div>
+
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Admin Dashboard</h1>
+            <p class="view-subtitle">Manage all found/lost reports and approve or reject claim requests.</p>
+          </div>
+          <button class="btn btn-outline btn-sm" id="admin-reset-data-btn" title="Reset to original sample data">
+            <i data-lucide="rotate-ccw"></i> Reset Demo Data
+          </button>
+        </div>
+
+        <!-- Admin Stats -->
+        <div class="stats-grid" id="admin-stats-grid">
+          <div class="stat-card stat-found">
+            <div class="stat-icon"><i data-lucide="package-check"></i></div>
+            <div class="stat-info">
+              <div class="stat-number" id="admin-stat-found">0</div>
+              <div class="stat-label">Total Found</div>
+            </div>
+          </div>
+          <div class="stat-card stat-lost">
+            <div class="stat-icon"><i data-lucide="package-search"></i></div>
+            <div class="stat-info">
+              <div class="stat-number" id="admin-stat-lost">0</div>
+              <div class="stat-label">Total Lost</div>
+            </div>
+          </div>
+          <div class="stat-card stat-pending">
+            <div class="stat-icon"><i data-lucide="clock"></i></div>
+            <div class="stat-info">
+              <div class="stat-number" id="admin-stat-pending">0</div>
+              <div class="stat-label">Pending Claims</div>
+            </div>
+          </div>
+          <div class="stat-card stat-approved">
+            <div class="stat-icon"><i data-lucide="check-circle-2"></i></div>
+            <div class="stat-info">
+              <div class="stat-number" id="admin-stat-approved">0</div>
+              <div class="stat-label">Approved</div>
+            </div>
+          </div>
+          <div class="stat-card stat-returned">
+            <div class="stat-icon"><i data-lucide="handshake"></i></div>
+            <div class="stat-info">
+              <div class="stat-number" id="admin-stat-returned">0</div>
+              <div class="stat-label">Returned</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Tabs -->
+        <div class="tabs-container">
+          <div class="tabs-header">
+            <button class="tab-btn active" data-tab="admin-found">Found Items</button>
+            <button class="tab-btn" data-tab="admin-lost">Lost Items</button>
+            <button class="tab-btn" data-tab="admin-pending-claims">Pending Claims</button>
+            <button class="tab-btn" data-tab="admin-all-claims">All Claims</button>
+          </div>
+
+          <div class="tab-content active" id="tab-admin-found">
+            <div class="admin-table-wrapper">
+              <table class="admin-table" id="admin-found-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Location</th>
+                    <th>Date Found</th>
+                    <th>Finder</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-found-tbody"><!-- JS renders --></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-admin-lost">
+            <div class="admin-table-wrapper">
+              <table class="admin-table" id="admin-lost-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Last Seen</th>
+                    <th>Date Lost</th>
+                    <th>Owner</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-lost-tbody"><!-- JS renders --></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-admin-pending-claims">
+            <div class="claims-review-list" id="admin-pending-claims-list"><!-- JS renders --></div>
+          </div>
+
+          <div class="tab-content" id="tab-admin-all-claims">
+            <div class="admin-table-wrapper">
+              <table class="admin-table" id="admin-claims-table">
+                <thead>
+                  <tr>
+                    <th>Claim ID</th>
+                    <th>Item</th>
+                    <th>Claimant</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-claims-tbody"><!-- JS renders --></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========== ITEM DETAIL MODAL ========== -->
+  <div class="modal-overlay" id="item-modal" role="dialog" aria-modal="true" aria-label="Item Details">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="item-modal-close" aria-label="Close">
+        <i data-lucide="x"></i>
+      </button>
+      <div class="modal-body" id="item-modal-body"><!-- JS renders --></div>
+    </div>
+  </div>
+
+  <!-- ========== CLAIM MODAL ========== -->
+  <div class="modal-overlay" id="claim-modal" role="dialog" aria-modal="true" aria-label="Claim Item">
+    <div class="modal-card claim-modal-card">
+      <button class="modal-close-btn" id="claim-modal-close" aria-label="Close">
+        <i data-lucide="x"></i>
+      </button>
+      <div class="modal-header-section">
+        <h2><i data-lucide="file-text"></i> Claim This Item</h2>
+        <p id="claim-modal-item-name" class="claim-modal-subtitle"></p>
+      </div>
+      <form id="claim-form" novalidate>
+        <input type="hidden" id="claim-item-id" />
+        <div class="form-group">
+          <label for="claim-student-name">Your Full Name <span class="required">*</span></label>
+          <input type="text" id="claim-student-name" placeholder="Your full name" required />
+          <span class="field-error" id="claim-name-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="claim-student-email">Your College Email <span class="required">*</span></label>
+          <input type="email" id="claim-student-email" placeholder="yourname@college.edu" required />
+          <span class="field-error" id="claim-email-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="claim-description">Why is this yours? <span class="required">*</span></label>
+          <textarea id="claim-description" rows="3" placeholder="Explain how you know this item is yours…" required></textarea>
+          <span class="field-error" id="claim-desc-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="claim-identifiers">Unique Identifiers <span class="required">*</span></label>
+          <textarea id="claim-identifiers" rows="2" placeholder="Describe unique marks, engravings, serial numbers, or contents…" required></textarea>
+          <span class="field-error" id="claim-id-err"></span>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" id="claim-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i data-lucide="send"></i> Submit Claim
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== NOTIFY OWNER (I FOUND THIS ITEM) MODAL ========== -->
+  <div class="modal-overlay" id="notify-owner-modal" role="dialog" aria-modal="true" aria-label="Notify Item Owner">
+    <div class="modal-card claim-modal-card">
+      <button class="modal-close-btn" id="notify-modal-close" aria-label="Close">
+        <i data-lucide="x"></i>
+      </button>
+      <div class="modal-header-section notify-header">
+        <div class="notify-icon-badge"><i data-lucide="bell-ring"></i></div>
+        <div>
+          <h2>I Found This Item!</h2>
+          <p id="notify-modal-subtitle" class="claim-modal-subtitle">Send a direct message &amp; location alert to the owner</p>
+        </div>
+      </div>
+      
+      <div class="notify-target-card" id="notify-target-summary">
+        <!-- JS renders target item & owner summary -->
+      </div>
+
+      <form id="notify-owner-form" novalidate>
+        <input type="hidden" id="notify-item-id" />
+        <div class="form-group">
+          <label for="notify-finder-name">Your Full Name (Finder) <span class="required">*</span></label>
+          <input type="text" id="notify-finder-name" placeholder="Your full name" required />
+          <span class="field-error" id="notify-name-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="notify-finder-contact">Your College Email / Phone <span class="required">*</span></label>
+          <input type="text" id="notify-finder-contact" placeholder="yourname@college.edu or Mobile Number" required />
+          <span class="field-error" id="notify-contact-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="notify-item-location">Where can the owner retrieve it? <span class="required">*</span></label>
+          <input type="text" id="notify-item-location" placeholder="e.g. Handed to Main Security Gate / I have it in Room 302" required />
+          <span class="field-error" id="notify-loc-err"></span>
+        </div>
+        <div class="form-group">
+          <label for="notify-message">Message for the Owner <span class="required">*</span></label>
+          <textarea id="notify-message" rows="3" placeholder="Describe where you found it and any details to help them collect it safely…" required></textarea>
+          <span class="field-error" id="notify-msg-err"></span>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" id="notify-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-success">
+            <i data-lucide="send"></i> Notify Owner (Item Found)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== TOAST CONTAINER ========== -->
+  <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- Scripts -->
+  <script src="js/lucide.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
